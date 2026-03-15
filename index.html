@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Apology</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: linear-gradient(to bottom, #1e293b, #0f172a); }
+        canvas { display: block; position: fixed; top: 0; left: 0; z-index: 1; }
+        #ui {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10vh;
+            pointer-events: none;
+        }
+        .card { pointer-events: auto; }
+        #noBtn { transition: all 0.1s ease; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="card bg-black/70 backdrop-blur-lg border border-white/20 p-8 rounded-3xl text-center shadow-2xl mx-4">
+            <h1 class="text-white text-3xl font-bold mb-2">I'm really sorry.</h1>
+            <p class="text-gray-300 mb-6">I messed up. Can we make up?</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="accept()" class="bg-white text-black px-10 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">Yes</button>
+                <button id="noBtn" onmouseover="dodge()" onclick="dodge()" class="border border-white/40 text-white px-10 py-3 rounded-xl">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, cube;
+
+        function init() {
+            // 1. Setup Scene
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // 2. Create a "Floating Heart" (Simplified to a Red Box if geometry fails)
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ color: 0xff3366 });
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            // 3. Lights
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(1, 1, 2);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+            camera.position.z = 5;
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(cube) {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                // Move it up and down
+                cube.position.y = Math.sin(Date.now() * 0.002) * 0.5;
+            }
+            renderer.render(scene, camera);
+        }
+
+        function dodge() {
+            const btn = document.getElementById('noBtn');
+            const x = Math.random() * (window.innerWidth - btn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+            btn.style.position = 'fixed';
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+        }
+
+        function accept() {
+            document.body.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-screen bg-rose-600 text-white text-center">
+                    <h1 class="text-8xl animate-bounce">❤️</h1>
+                    <h2 class="text-4xl font-bold mt-4">Thank You!</h2>
+                </div>`;
+        }
+
+        // Handle Resizing
+        window.addEventListener('resize', () => {
+            if(camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        // ONLY START AFTER PAGE LOADS
+        window.onload = init;
+    </script>
+</body>
+</html>
